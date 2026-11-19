@@ -32,11 +32,19 @@ export const DemographicCard: React.FC<DemographicCardProps> = ({ demographic })
       <div className="flex items-center justify-between text-xs text-slate-600">
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" />
-          <span>Male: <strong className="text-slate-800">{demographic.malePercentage}%</strong> ({demographic.maleCount.toLocaleString()})</span>
+          <span>
+            Male: <strong className="text-slate-800">{demographic.malePercentage}%</strong>
+            {demographic.maleCount !== undefined &&
+              ` (${demographic.maleCount.toLocaleString()})`}
+          </span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
-          <span>Female: <strong className="text-slate-800">{demographic.femalePercentage}%</strong> ({demographic.femaleCount.toLocaleString()})</span>
+          <span>
+            Female: <strong className="text-slate-800">{demographic.femalePercentage}%</strong>
+            {demographic.femaleCount !== undefined &&
+              ` (${demographic.femaleCount.toLocaleString()})`}
+          </span>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 export interface DemographicData {
-  maleCount: number;
-  femaleCount: number;
+  maleCount?: number;
+  femaleCount?: number;
   malePercentage: number;
   femalePercentage: number;
 }
@@ -10,10 +10,10 @@ export interface BannerAnalyticItem {
   title: string;
   imageUrl: string;
   targetUrl?: string;
-  placement: string;
-  status: "active" | "paused" | "expired";
+  placement?: string;
+  status?: "active" | "paused" | "expired";
   dateRange: string; // Text အနေနဲ့ Backend က manual ပို့ပေးမည့် Date Range (ဥပမာ "Nov 01, 2026 - Nov 15, 2026")
-  createdAt: string;
+  createdAt?: string;
   metrics: {
     clickCount: number;
     viewCount: number;

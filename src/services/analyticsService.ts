@@ -69,8 +69,82 @@ export const MOCK_BANNERS: BannerAnalyticItem[] = [
   },
 ];
 
-// Backend API Service for v2.heyplaymyanmar.com
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://v2.heyplaymyanmar.com/api";
+interface BackendAnalyticsResponse {
+  success: boolean;
+  data?: {
+    id: number | string;
+    title: string;
+    starts_at: string;
+    ends_at: string;
+    metrics?: Array<{
+      banner_image: string | null;
+      click_count: number | string;
+      view_count: number | string;
+      avg_view_seconds: number | string;
+      male_percentage: number | string;
+      female_percentage: number | string;
+    }>;
+  } | null;
+}
+
+export async function fetchBannerAnalyticsByToken(
+  token: string,
+  signal?: AbortSignal,
+): Promise<BannerAnalyticItem | null> {
+  const res = await fetch(
+    `/api/analytics/${encodeURIComponent(token)}`,
+    { signal },
+  );
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch analytics (${res.status})`);
+  }
+
+  const response = (await res.json()) as BackendAnalyticsResponse;
+  const record = response.data;
+  const metrics = record?.metrics?.[0];
+
+  if (!response.success || !record || !metrics) {
+    return null;
+  }
+
+  const clickCount = Number(metrics.click_count);
+  const viewCount = Number(metrics.view_count);
+  const maleValue = Number(metrics.male_percentage);
+  const femaleValue = Number(metrics.female_percentage);
+  const demographicTotal = maleValue + femaleValue;
+  const malePercentage =
+    demographicTotal > 0 ? Number(((maleValue / demographicTotal) * 100).toFixed(2)) : 0;
+  const femalePercentage =
+    demographicTotal > 0 ? Number((100 - malePercentage).toFixed(2)) : 0;
+
+  if (
+    !Number.isFinite(clickCount) ||
+    !Number.isFinite(viewCount) ||
+    !Number.isFinite(Number(metrics.avg_view_seconds)) ||
+    !Number.isFinite(maleValue) ||
+    !Number.isFinite(femaleValue)
+  ) {
+    throw new Error("The API returned invalid analytics values.");
+  }
+
+  return {
+    id: String(record.id),
+    title: record.title,
+    imageUrl: metrics.banner_image ?? "",
+    dateRange: `${record.starts_at} - ${record.ends_at}`,
+    metrics: {
+      clickCount,
+      viewCount,
+      avgSecondView: Number(metrics.avg_view_seconds),
+      ctr: viewCount > 0 ? Number(((clickCount / viewCount) * 100).toFixed(2)) : 0,
+      demographic: {
+        malePercentage,
+        femalePercentage,
+      },
+    },
+  };
+}
 
 export async function fetchBannerAnalytics(): Promise<BannerAnalyticItem[]> {
   try {

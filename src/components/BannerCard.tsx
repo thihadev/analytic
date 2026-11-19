@@ -30,11 +30,17 @@ export const BannerCard: React.FC<BannerCardProps> = ({ banner }) => {
         {/* Banner Preview Image (Left) */}
         <div className="lg:col-span-5">
           <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-video shadow-sm">
-            <img
-              src={banner.imageUrl}
-              alt={banner.title}
-              className="w-full h-full object-cover"
-            />
+            {banner.imageUrl ? (
+              <img
+                src={banner.imageUrl}
+                alt={banner.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-sm text-slate-400">
+                No banner image available
+              </div>
+            )}
           </div>
         </div>
 
