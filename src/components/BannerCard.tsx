@@ -28,7 +28,7 @@ export const BannerCard: React.FC<BannerCardProps> = ({ banner }) => {
       {/* Main Body: Banner Image + Info Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5 items-center">
         {/* Banner Preview Image (Left) */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-square shadow-sm">
             {banner.imageUrl ? (
               <img
