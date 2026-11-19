@@ -28,7 +28,7 @@ export const BannerCard: React.FC<BannerCardProps> = ({ banner }) => {
       {/* Main Body: Banner Image + Info Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5 items-center">
         {/* Banner Preview Image (Left) */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-4">
           <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-square shadow-sm">
             {banner.imageUrl ? (
               <img
@@ -45,7 +45,7 @@ export const BannerCard: React.FC<BannerCardProps> = ({ banner }) => {
         </div>
 
         {/* Analytics Info (Right) */}
-        <div className="lg:col-span-7 space-y-4">
+        <div className="lg:col-span-8 space-y-4">
           {/* Key Metrics in 3 clean cards */}
           <div className="grid grid-cols-3 gap-3">
             {/* Click Count */}
