@@ -9,7 +9,7 @@ import { BannerAnalyticItem } from "@/types/analytics";
 
 export default function BannerAnalyticsPage() {
   const { token } = useParams<{ token: string }>();
-  const [banner, setBanner] = useState<BannerAnalyticItem | null>(null);
+  const [banners, setBanners] = useState<BannerAnalyticItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -19,7 +19,7 @@ export default function BannerAnalyticsPage() {
 
     try {
       const data = await fetchBannerAnalyticsByToken(token, signal);
-      setBanner(data);
+      setBanners(data);
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
         return;
@@ -28,7 +28,7 @@ export default function BannerAnalyticsPage() {
       setError(
         err instanceof Error ? err.message : "Unable to load analytics data.",
       );
-      setBanner(null);
+      setBanners(null);
     } finally {
       if (!signal?.aborted) {
         setLoading(false);
@@ -75,8 +75,12 @@ export default function BannerAnalyticsPage() {
           >
             Unable to load this report: {error}
           </div>
-        ) : banner ? (
-          <BannerCard banner={banner} />
+        ) : banners?.length ? (
+          <div className="space-y-6">
+            {banners.map((banner) => (
+              <BannerCard key={banner.id} banner={banner} />
+            ))}
+          </div>
         ) : (
           <NoReport compact />
         )}

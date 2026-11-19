@@ -77,6 +77,7 @@ interface BackendAnalyticsResponse {
     starts_at: string;
     ends_at: string;
     metrics?: Array<{
+      id?: number | string;
       banner_image: string | null;
       click_count: number | string;
       view_count: number | string;
@@ -90,7 +91,7 @@ interface BackendAnalyticsResponse {
 export async function fetchBannerAnalyticsByToken(
   token: string,
   signal?: AbortSignal,
-): Promise<BannerAnalyticItem | null> {
+): Promise<BannerAnalyticItem[] | null> {
   const res = await fetch(
     `/api/analytics/${encodeURIComponent(token)}`,
     { signal },
@@ -106,48 +107,53 @@ export async function fetchBannerAnalyticsByToken(
 
   const response = (await res.json()) as BackendAnalyticsResponse;
   const record = response.data;
-  const metrics = record?.metrics?.[0];
+  const metricsList = record?.metrics;
 
-  if (!response.success || !record || !metrics) {
+  if (!response.success || !record || !metricsList?.length) {
     return null;
   }
 
-  const clickCount = Number(metrics.click_count);
-  const viewCount = Number(metrics.view_count);
-  const maleValue = Number(metrics.male_percentage);
-  const femaleValue = Number(metrics.female_percentage);
-  const demographicTotal = maleValue + femaleValue;
-  const malePercentage =
-    demographicTotal > 0 ? Number(((maleValue / demographicTotal) * 100).toFixed(2)) : 0;
-  const femalePercentage =
-    demographicTotal > 0 ? Number((100 - malePercentage).toFixed(2)) : 0;
+  return metricsList.map((metric, index) => {
+    const clickCount = Number(metric.click_count);
+    const viewCount = Number(metric.view_count);
+    const avgSecondView = Number(metric.avg_view_seconds);
+    const maleValue = Number(metric.male_percentage);
+    const femaleValue = Number(metric.female_percentage);
+    const demographicTotal = maleValue + femaleValue;
+    const malePercentage =
+      demographicTotal > 0
+        ? Number(((maleValue / demographicTotal) * 100).toFixed(2))
+        : 0;
+    const femalePercentage =
+      demographicTotal > 0 ? Number((100 - malePercentage).toFixed(2)) : 0;
 
-  if (
-    !Number.isFinite(clickCount) ||
-    !Number.isFinite(viewCount) ||
-    !Number.isFinite(Number(metrics.avg_view_seconds)) ||
-    !Number.isFinite(maleValue) ||
-    !Number.isFinite(femaleValue)
-  ) {
-    throw new Error("The API returned invalid analytics values.");
-  }
+    if (
+      !Number.isFinite(clickCount) ||
+      !Number.isFinite(viewCount) ||
+      !Number.isFinite(avgSecondView) ||
+      !Number.isFinite(maleValue) ||
+      !Number.isFinite(femaleValue)
+    ) {
+      throw new Error("The API returned invalid analytics values.");
+    }
 
-  return {
-    id: String(record.id),
-    title: record.title,
-    imageUrl: metrics.banner_image ?? "",
-    dateRange: `${record.starts_at} - ${record.ends_at}`,
-    metrics: {
-      clickCount,
-      viewCount,
-      avgSecondView: Number(metrics.avg_view_seconds),
-      ctr: viewCount > 0 ? Number(((clickCount / viewCount) * 100).toFixed(2)) : 0,
-      demographic: {
-        malePercentage,
-        femalePercentage,
+    return {
+      id: `${record.id}-${metric.id ?? index}`,
+      title: record.title,
+      imageUrl: metric.banner_image ?? "",
+      dateRange: `${record.starts_at} - ${record.ends_at}`,
+      metrics: {
+        clickCount,
+        viewCount,
+        avgSecondView,
+        ctr: viewCount > 0 ? Number(((clickCount / viewCount) * 100).toFixed(2)) : 0,
+        demographic: {
+          malePercentage,
+          femalePercentage,
+        },
       },
-    },
-  };
+    };
+  });
 }
 
 export async function fetchBannerAnalytics(): Promise<BannerAnalyticItem[]> {
